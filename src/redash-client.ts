@@ -155,7 +155,18 @@ export class RedashClient {
     maxAttempts = 60
   ): Promise<QueryResult> {
     // Execute query
-    const { job } = await this.executeQuery(request);
+    const response = await this.executeQuery(request);
+
+    // Check if we got a cached result directly
+    if ('query_result' in response) {
+      return (response as unknown as { query_result: QueryResult }).query_result;
+    }
+
+    // Otherwise, poll for job completion
+    const { job } = response;
+    if (!job) {
+      throw new Error('Invalid response: neither job nor query_result found');
+    }
 
     // Poll for completion
     let attempts = 0;
