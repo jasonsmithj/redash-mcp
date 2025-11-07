@@ -9,9 +9,22 @@ import {
   ListToolsRequestSchema,
   TextContent,
 } from '@modelcontextprotocol/sdk/types.js';
+import { readFileSync } from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 import { RedashClient } from './redash-client.js';
 import { listDataSourcesTool, getDataSourceTool } from './tools/datasource.js';
 import { executeQueryAndWaitTool, listQueriesTool } from './tools/query.js';
+
+/**
+ * Load package.json to get version dynamically
+ */
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const packageJson = JSON.parse(readFileSync(join(__dirname, '../package.json'), 'utf-8')) as {
+  version: string;
+  name: string;
+};
 
 /**
  * MCP Server instance
@@ -19,7 +32,7 @@ import { executeQueryAndWaitTool, listQueriesTool } from './tools/query.js';
 const server = new Server(
   {
     name: 'redash-mcp',
-    version: '1.0.0',
+    version: packageJson.version,
   },
   {
     capabilities: {
