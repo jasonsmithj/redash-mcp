@@ -1,0 +1,57 @@
+# Dependencies
+node_modules/
+# Note: pnpm-lock.yaml is needed for reproducible builds
+
+# Build outputs (will be built in Docker)
+dist/
+*.tsbuildinfo
+
+# Testing
+coverage/
+.nyc_output/
+tests/
+
+# Development files
+.git/
+.github/
+.vscode/
+.idea/
+.cursor/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Documentation
+*.md
+!README.md
+
+# Config files
+.editorconfig
+.gitignore
+.dockerignore
+.actrc
+.prettierignore
+
+# Logs
+logs/
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+.AppleDouble
+.LSOverride
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.swp
+*.swo
+*~
+
+# CI/CD files
+.github/workflows/
+
