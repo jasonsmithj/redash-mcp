@@ -308,6 +308,21 @@ describe('RedashClient', () => {
       expect(result.data.rows).toHaveLength(2);
     });
 
+    it('should throw error when response has neither job nor query_result', async () => {
+      // Invalid response with neither job nor query_result
+      (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({}),
+      });
+
+      await expect(
+        client.executeQueryAndWait({
+          query: 'SELECT * FROM users',
+          data_source_id: 1,
+        })
+      ).rejects.toThrow('Invalid response: neither job nor query_result found');
+    });
+
     it('should throw error when job fails', async () => {
       const mockJob: Job = {
         id: 'job-fail',
