@@ -7,6 +7,10 @@
 
 A Model Context Protocol (MCP) server for Redash that provides query execution, data source management, and more through a standardized interface.
 
+<a href="https://glama.ai/mcp/servers/@jasonsmithj/redash-mcp">
+  <img width="380" height="200" src="https://glama.ai/mcp/servers/@jasonsmithj/redash-mcp/badge" alt="Redash Server MCP server" />
+</a>
+
 ## ✨ Features
 
 - 🔍 **Query Execution**: Execute SQL queries and retrieve results
