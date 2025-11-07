@@ -1,0 +1,5 @@
+# act configuration for local GitHub Actions testing
+# Use the medium size image for better compatibility
+-P ubuntu-latest=catthehacker/ubuntu:act-latest
+--container-architecture linux/amd64
+
