@@ -1,0 +1,28 @@
+name: redash-mcp
+
+services:
+  redash-mcp:
+    image: jasonsmithj/redash-mcp:latest
+    # For local development, uncomment to build from source:
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile
+    container_name: redash-mcp
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
+    environment:
+      - REDASH_API_KEY=${REDASH_API_KEY:?REDASH_API_KEY is required}
+      - REDASH_BASE_URL=${REDASH_BASE_URL:?REDASH_BASE_URL is required}
+      - REDASH_API_TIMEOUT=${REDASH_API_TIMEOUT:-30000}
+      - REDASH_MAX_RESULTS=${REDASH_MAX_RESULTS:-1000}
+    volumes:
+      # Mount .env file for easy configuration
+      - ./.env:/app/.env:ro
+    networks:
+      - redash-mcp-network
+
+networks:
+  redash-mcp-network:
+    driver: bridge
+
