@@ -156,12 +156,12 @@ export class RedashClient {
   ): Promise<QueryResult> {
     // Execute query
     const response = await this.executeQuery(request);
-    
+
     // Check if we got a cached result directly
     if ('query_result' in response) {
       return (response as unknown as { query_result: QueryResult }).query_result;
     }
-    
+
     // Otherwise, poll for job completion
     const { job } = response;
     if (!job) {
