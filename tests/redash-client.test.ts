@@ -223,6 +223,37 @@ describe('RedashClient', () => {
   });
 
   describe('executeQueryAndWait', () => {
+    it('should return cached result directly when available', async () => {
+      const mockResult: QueryResult = {
+        id: 'result-cached',
+        query_hash: 'hash-cached',
+        query: 'SELECT * FROM users',
+        data: {
+          columns: [{ name: 'id', friendly_name: 'ID', type: 'integer' }],
+          rows: [{ id: 1 }, { id: 2 }],
+        },
+        data_source_id: 1,
+        runtime: 0.05,
+        retrieved_at: new Date().toISOString(),
+      };
+
+      // When cached result is available, API returns query_result directly
+      (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ query_result: mockResult }),
+      });
+
+      const result = await client.executeQueryAndWait({
+        query: 'SELECT * FROM users',
+        data_source_id: 1,
+      });
+
+      expect(result).toEqual(mockResult);
+      expect(result.data.rows).toHaveLength(2);
+      // Should only call fetch once (no polling needed)
+      expect(global.fetch).toHaveBeenCalledTimes(1);
+    });
+
     it('should execute query and wait for result', async () => {
       const mockJob: Job = {
         id: 'job-123',
