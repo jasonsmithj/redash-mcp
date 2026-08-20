@@ -98,7 +98,10 @@ describe('Query Tools', () => {
       const result = await executeQueryAndWaitTool.handler({ query: 'SELECT 1' }, mockClient);
 
       expect(result.isError).toBe(true);
-      expect(result.content[0]?.text).toContain('data_source_id is required');
+      expect(result.content[0]).toMatchObject({
+        type: 'text',
+        text: expect.stringContaining('data_source_id is required'),
+      });
     });
 
     it('should handle query execution errors', async () => {
@@ -113,7 +116,10 @@ describe('Query Tools', () => {
       );
 
       expect(result.isError).toBe(true);
-      expect(result.content[0]?.text).toContain('Query timeout');
+      expect(result.content[0]).toMatchObject({
+        type: 'text',
+        text: expect.stringContaining('Query timeout'),
+      });
     });
   });
 
@@ -170,7 +176,10 @@ describe('Query Tools', () => {
       const result = await listQueriesTool.handler({}, mockClient);
 
       expect(result.isError).toBe(true);
-      expect(result.content[0]?.text).toContain('API error');
+      expect(result.content[0]).toMatchObject({
+        type: 'text',
+        text: expect.stringContaining('API error'),
+      });
     });
   });
 });
