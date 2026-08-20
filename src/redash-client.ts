@@ -97,7 +97,7 @@ export class RedashClient {
       return (await response.json()) as T;
     } catch (error) {
       if (error instanceof Error && error.name === 'AbortError') {
-        throw new Error(`Request timeout after ${this.config.timeout}ms`);
+        throw new Error(`Request timeout after ${this.config.timeout}ms`, { cause: error });
       }
       throw error;
     } finally {
