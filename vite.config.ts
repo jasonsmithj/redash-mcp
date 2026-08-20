@@ -1,10 +1,10 @@
 import { defineConfig } from 'vite';
-import { resolve } from 'path';
+import { resolve } from 'node:path';
 
 export default defineConfig({
   build: {
     lib: {
-      entry: resolve(__dirname, 'src/index.ts'),
+      entry: resolve(import.meta.dirname, 'src/index.ts'),
       name: 'RedashMCP',
       fileName: 'index',
       formats: ['es'],
@@ -16,16 +16,16 @@ export default defineConfig({
         '@modelcontextprotocol/sdk/types.js',
       ],
     },
-    target: 'node22',
+    target: 'node26',
     outDir: 'dist',
+    emptyOutDir: false,
     sourcemap: true,
     minify: false,
     ssr: true,
   },
   resolve: {
     alias: {
-      '@': resolve(__dirname, './src'),
+      '@': resolve(import.meta.dirname, './src'),
     },
   },
 });
-
