@@ -18,14 +18,14 @@ A Model Context Protocol (MCP) server for Redash that provides query execution, 
 
 ## 📋 Requirements
 
-- **Node.js**: >= 22.0.0
-- **pnpm**: >= 9.0.0
+- **Node.js**: >= 26.0.0 (26.7.0 recommended)
+- **pnpm**: >= 11.0.0 (11.22.0 recommended)
 - **Redash Instance**: With API access
 - **Docker** (optional): For containerized deployment
 
 ## 🚀 Quick Start
 
-### Using npx (Recommended)
+### Local Installation
 
 1. Clone the repository:
 
@@ -58,8 +58,7 @@ pnpm link
 {
   "mcpServers": {
     "redash": {
-      "command": "npx",
-      "args": ["redash-mcp"],
+      "command": "redash-mcp",
       "env": {
         "REDASH_API_KEY": "your_api_key_here",
         "REDASH_BASE_URL": "https://redash.example.com"
@@ -245,10 +244,10 @@ Test GitHub Actions locally using `act`:
 act -l
 
 # Run CI workflow
-act push
+act push --workflows .github/workflows/ci.yml
 
 # Run specific job
-act -j quality
+act push --workflows .github/workflows/ci.yml --job quality
 ```
 
 ### Project Structure
@@ -268,6 +267,8 @@ redash-mcp/
 │   └── workflows/            # GitHub Actions CI/CD
 ├── Dockerfile                # Docker configuration
 ├── compose.yaml              # Docker Compose configuration
+├── pnpm-workspace.yaml       # pnpm build-script policy
+├── tsconfig.build.json       # Production TypeScript build configuration
 └── package.json
 ```
 
@@ -276,19 +277,23 @@ redash-mcp/
 - `pnpm dev`: Watch mode for development
 - `pnpm build`: Build for production
 - `pnpm test`: Run tests
+- `pnpm test:ui`: Run tests with the Vitest UI
 - `pnpm test:coverage`: Run tests with coverage report
+- `pnpm typecheck`: Type-check source and tests
 - `pnpm lint`: Lint code
+- `pnpm lint:fix`: Fix lint issues where possible
 - `pnpm format`: Format code
+- `pnpm format:check`: Check formatting without modifying files
 - `pnpm ci`: Run all quality checks
 
 ## 🏗 Tech Stack
 
-- **Runtime**: Node.js 22+ with ES Modules
-- **Language**: TypeScript 5.7+ (strict mode)
-- **Build Tool**: Vite 6.x
-- **Package Manager**: pnpm 9.x
-- **Testing**: Vitest 3.x with coverage
-- **Linting**: ESLint 9.x (Flat Config)
+- **Runtime**: Node.js 26.7 with ES Modules and an ES2025 target
+- **Language**: TypeScript 6.0 (strict mode)
+- **Build Tool**: Vite 8.x
+- **Package Manager**: pnpm 11.x
+- **Testing**: Vitest 4.x with V8 coverage
+- **Linting**: ESLint 10.x (Flat Config)
 - **Formatting**: Prettier 3.x
 - **MCP SDK**: @modelcontextprotocol/sdk 1.x
 

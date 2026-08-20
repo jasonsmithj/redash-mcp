@@ -74,6 +74,49 @@ describe('RedashClient', () => {
 
       await expect(client.listDataSources()).rejects.toThrow();
     });
+
+    it('should include a JSON response body in API errors', async () => {
+      (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        ok: false,
+        status: 400,
+        statusText: 'Bad Request',
+        headers: { get: () => 'application/json' },
+        json: async () => ({ error: 'Invalid query' }),
+      });
+
+      await expect(client.listDataSources()).rejects.toMatchObject({
+        message: expect.stringContaining('Invalid query'),
+        status: 400,
+      });
+    });
+
+    it('should preserve the timeout error as the cause', async () => {
+      vi.useFakeTimers();
+      const timeoutClient = new RedashClient({
+        apiKey: mockApiKey,
+        baseUrl: mockBaseUrl,
+        timeout: 1,
+      });
+      (global.fetch as ReturnType<typeof vi.fn>).mockImplementationOnce(
+        (_url: string, options: RequestInit) =>
+          new Promise((_resolve, reject) => {
+            options.signal?.addEventListener('abort', () => {
+              const abortError = new Error('Aborted');
+              abortError.name = 'AbortError';
+              reject(abortError);
+            });
+          })
+      );
+
+      const request = timeoutClient.listDataSources();
+      const rejection = expect(request).rejects.toMatchObject({
+        message: 'Request timeout after 1ms',
+        cause: expect.objectContaining({ name: 'AbortError' }),
+      });
+      await vi.advanceTimersByTimeAsync(1);
+      await rejection;
+      vi.useRealTimers();
+    });
   });
 
   describe('getDataSource', () => {
@@ -353,6 +396,40 @@ describe('RedashClient', () => {
           data_source_id: 1,
         })
       ).rejects.toThrow('Query timeout');
+    });
+
+    it('should poll pending jobs before returning the result', async () => {
+      const pendingJob: Job = { id: 'job-pending', status: 1, updated_at: Date.now() };
+      const successfulJob: Job = {
+        id: 'job-pending',
+        status: 3,
+        query_result_id: 'result-pending',
+        updated_at: Date.now(),
+      };
+      const mockResult = { id: 'result-pending' } as QueryResult;
+
+      (global.fetch as ReturnType<typeof vi.fn>)
+        .mockResolvedValueOnce({ ok: true, json: async () => ({ job: pendingJob }) })
+        .mockResolvedValueOnce({ ok: true, json: async () => ({ job: pendingJob }) })
+        .mockResolvedValueOnce({ ok: true, json: async () => ({ job: successfulJob }) })
+        .mockResolvedValueOnce({ ok: true, json: async () => ({ query_result: mockResult }) });
+
+      await expect(
+        client.executeQueryAndWait({ query: 'SELECT 1', data_source_id: 1 }, 0)
+      ).resolves.toBe(mockResult);
+    });
+
+    it('should reject successful jobs without a result ID', async () => {
+      const pendingJob: Job = { id: 'job-empty', status: 1, updated_at: Date.now() };
+      const invalidSuccess: Job = { id: 'job-empty', status: 3, updated_at: Date.now() };
+
+      (global.fetch as ReturnType<typeof vi.fn>)
+        .mockResolvedValueOnce({ ok: true, json: async () => ({ job: pendingJob }) })
+        .mockResolvedValueOnce({ ok: true, json: async () => ({ job: invalidSuccess }) });
+
+      await expect(
+        client.executeQueryAndWait({ query: 'SELECT 1', data_source_id: 1 })
+      ).rejects.toThrow('Query completed but no result ID found');
     });
   });
 

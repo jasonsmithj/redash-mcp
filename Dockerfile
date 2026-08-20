@@ -1,15 +1,15 @@
 # syntax=docker/dockerfile:1
 
 # Build stage
-FROM node:22.3.0-alpine AS builder
+FROM node:26.7.0-alpine AS builder
 
 # Install pnpm
-RUN corepack enable && corepack prepare pnpm@9.14.4 --activate
+RUN npm install --global pnpm@11.22.0
 
 WORKDIR /app
 
-# Copy package files
-COPY package.json pnpm-lock.yaml* ./
+# Copy package files and pnpm build policy
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 
 # Install dependencies
 RUN pnpm install --frozen-lockfile
@@ -21,15 +21,15 @@ COPY . .
 RUN pnpm run build
 
 # Production stage
-FROM node:22.3.0-alpine
+FROM node:26.7.0-alpine
 
 # Install pnpm
-RUN corepack enable && corepack prepare pnpm@9.14.4 --activate
+RUN npm install --global pnpm@11.22.0
 
 WORKDIR /app
 
-# Copy package files
-COPY package.json pnpm-lock.yaml* ./
+# Copy package files and pnpm build policy
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 
 # Install production dependencies only
 RUN pnpm install --frozen-lockfile --prod
@@ -49,4 +49,3 @@ ENV NODE_ENV=production
 
 # Run the application
 ENTRYPOINT ["node", "dist/index.js"]
-
